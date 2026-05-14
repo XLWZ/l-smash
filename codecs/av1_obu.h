@@ -1,9 +1,9 @@
 /*****************************************************************************
- * bits.h
+ * av1_obu.c
  *****************************************************************************
- * Copyright (C) 2010-2017 L-SMASH project
+ * Copyright (C) 2020 L-SMASH Project
  *
- * Authors: Takashi Hirata <silverfilain@gmail.com>
+ * Authors: Derek Buitenhuis <derek.buitenhuis@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,25 +18,39 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *****************************************************************************/
 
-/* This file is available under an ISC license. */
+typedef struct {
+    uint32_t seq_width;
+    uint32_t seq_height;
+    uint32_t render_width;
+    uint32_t render_height;
+    uint16_t primaries_index;
+    uint16_t transfer_index;
+    uint16_t matrix_index;
+    uint8_t  full_range;
+} obu_av1_pixel_properties_t;
 
-typedef struct
-{
-    lsmash_bs_t *bs;
-    uint8_t      store;
-    uint8_t      cache;
-} lsmash_bits_t;
+typedef struct {
+    OBPState state;
+    OBPSequenceHeader seq;
+    int seen_seq;
+    int seen_frame_header;
+} obu_av1_sample_state_t;
 
-void lsmash_bits_init( lsmash_bits_t* bits, lsmash_bs_t *bs );
-lsmash_bits_t *lsmash_bits_create( lsmash_bs_t *bs );
-void lsmash_bits_cleanup( lsmash_bits_t *bits );
-void lsmash_bits_empty( lsmash_bits_t *bits );
-void lsmash_bits_put_align( lsmash_bits_t *bits );
-void lsmash_bits_get_align( lsmash_bits_t *bits );
-void lsmash_bits_put( lsmash_bits_t *bits, uint32_t width, uint64_t value );
-uint64_t lsmash_bits_get( lsmash_bits_t *bits, uint32_t width );
-void *lsmash_bits_export_data( lsmash_bits_t *bits, uint32_t *length );
-int lsmash_bits_import_data( lsmash_bits_t *bits, void *data, uint32_t length );
+lsmash_av1_specific_parameters_t *obu_av1_parse_first_tu
+(
+    lsmash_bs_t *bs,
+    uint32_t length,
+    uint32_t offset,
+    obu_av1_pixel_properties_t *props
+);
 
-lsmash_bits_t *lsmash_bits_adhoc_create(void);
-void lsmash_bits_adhoc_cleanup( lsmash_bits_t *bits );
+uint8_t *obu_av1_assemble_sample
+(
+    uint8_t *packetbuf,
+    uint32_t length,
+    uint32_t *samplelength,
+    obu_av1_sample_state_t *sstate,
+    uint32_t *max_render_width,
+    uint32_t *max_render_height,
+    int *issync
+);

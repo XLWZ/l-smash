@@ -1144,7 +1144,8 @@ static int hevc_get_access_unit_internal
         }
         else if( nalu_type <= HEVC_NALU_TYPE_RASL_R
              || (nalu_type >= HEVC_NALU_TYPE_BLA_W_LP && nalu_type <= HEVC_NALU_TYPE_CRA)
-             || (nalu_type >= HEVC_NALU_TYPE_VPS      && nalu_type <= HEVC_NALU_TYPE_SUFFIX_SEI)  )
+             || (nalu_type >= HEVC_NALU_TYPE_VPS      && nalu_type <= HEVC_NALU_TYPE_SUFFIX_SEI)
+             || (nalu_type == HEVC_NALU_TYPE_UNSPEC62 || nalu_type == HEVC_NALU_TYPE_UNSPEC63) )
         {
             int err;
             /* Increase the buffer if needed. */
@@ -1205,7 +1206,14 @@ static int hevc_get_access_unit_internal
                         if( (err = hevc_parse_sei( info->bits, &info->vps, &info->sps, &info->sei, &nuh,
                                                    sb->rbsp, nalu + nuh.length, nalu_length - nuh.length )) < 0 )
                             return hevc_get_au_internal_failed( hevc_imp, au, complete_au, err );
-                        hevc_append_nalu_to_au( au, nalu, nalu_length, probe );
+                        if( info->sei.mastering_display.present == 2 )
+                        {
+                            if( (err = hevc_try_to_append_dcr_nalu(info, HEVC_DCR_NALU_TYPE_PREFIX_SEI, nalu, nalu_length)) < 0 )
+                                return hevc_get_au_internal_failed( hevc_imp, au, complete_au, err );
+                            info->sei.mastering_display.present--; /* so that only one is added */
+                        }
+                        else
+                            hevc_append_nalu_to_au( au, nalu, nalu_length, probe );
                         break;
                     }
                     case HEVC_NALU_TYPE_VPS :
@@ -1365,12 +1373,18 @@ static lsmash_video_summary_t *hevc_setup_first_summary
 )
 {
     hevc_importer_t *hevc_imp = (hevc_importer_t *)importer->info;
+    hevc_info_t *info = &hevc_imp->info;
     lsmash_codec_specific_t *cs = (lsmash_codec_specific_t *)lsmash_list_get_entry_data( hevc_imp->hvcC_list, ++ hevc_imp->hvcC_number );
     if( !cs || !cs->data.structured )
     {
         lsmash_destroy_codec_specific_data( cs );
         return NULL;
     }
+
+    lsmash_hevc_specific_parameters_t *hevc_cs = (lsmash_hevc_specific_parameters_t *)cs->data.structured;
+    if( info->sei.hdr10p_present )
+        hevc_cs->has_hdr10p = 1;
+
     lsmash_video_summary_t *summary = hevc_create_summary( (lsmash_hevc_specific_parameters_t *)cs->data.structured,
                                                            &hevc_imp->info.sps, hevc_imp->max_au_length );
     if( !summary )

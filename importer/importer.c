@@ -46,6 +46,7 @@ extern const importer_functions mp4a_als_importer;
 extern const importer_functions dts_importer;
 extern const importer_functions flac_importer;
 extern const importer_functions wave_importer;
+extern const importer_functions ivf_importer;
 extern const importer_functions h264_importer;
 extern const importer_functions hevc_importer;
 extern const importer_functions vc1_importer;
@@ -63,6 +64,7 @@ static const importer_functions *importer_func_table[] =
     &dts_importer,
     &flac_importer,
     &wave_importer,
+    &ivf_importer,
     &h264_importer,
     &hevc_importer,
     &vc1_importer,
@@ -134,9 +136,11 @@ int lsmash_importer_find( importer_t *importer, const char *format, int auto_det
     int err = LSMASH_ERR_NAMELESS;
     if( auto_detect )
     {
+        size_t old_bs_max_size = importer->bs->buffer.max_size;
         /* just rely on detector. */
         for( int i = 0; (funcs = importer_func_table[i]) != NULL; i++ )
         {
+            importer->bs->buffer.max_size = old_bs_max_size;
             importer->class = &funcs->class;
             if( !funcs->detectable )
                 continue;
