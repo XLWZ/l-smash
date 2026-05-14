@@ -131,7 +131,7 @@ static uint32_t flac_get_frame_block_size
         case 7:
             if( offset + 6 > buf_size )
                 return 0;
-            return ((uint32_t)frame_data[offset + 4] << 8) | frame_data[offset + 5] + 1;
+            return (((uint32_t)frame_data[offset + 4] << 8) | frame_data[offset + 5]) + 1;
         default:
             return 256 << (bs_code - 8);
     }
@@ -510,7 +510,7 @@ static int flac_importer_probe( importer_t *imp )
     summary->samples_in_frame   = flac_imp->max_block_size; 
     summary->sbr_mode           = MP4A_AAC_SBR_NOT_SPECIFIED;
 
-    if( lsmash_list_add_entry( &imp->summaries, summary ) < 0 )
+    if( lsmash_list_add_entry( imp->summaries, summary ) < 0 )
     {
         lsmash_cleanup_summary( (lsmash_summary_t *) summary );
         err = LSMASH_ERR_MEMORY_ALLOC;
@@ -618,7 +618,7 @@ static int flac_importer_get_accessunit
     }
 
     /* Get frame number for validating the next-frame boundary */
-    uint64_t frame_num = flac_get_frame_sample_number
+    uint64_t frame_num = flac_get_frame_number
         ( buf, (uint32_t)remain, (uint32_t)sync_offset );
 
     /* Find next frame boundary by searching for the next valid sync word */
