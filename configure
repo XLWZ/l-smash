@@ -316,6 +316,7 @@ SRC_CODECS="      \
     alac.c        \
     description.c \
     dts.c         \
+    flac.c        \
     h264.c        \
     hevc.c        \
     id.c          \
@@ -333,6 +334,7 @@ SRC_IMPORTER="  \
     als_imp.c   \
     amr_imp.c   \
     dts_imp.c   \
+    flac_imp.c  \
     importer.c  \
     isobm_imp.c \
     mp3_imp.c   \

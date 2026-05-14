@@ -44,6 +44,7 @@ extern const importer_functions ac3_importer;
 extern const importer_functions eac3_importer;
 extern const importer_functions mp4a_als_importer;
 extern const importer_functions dts_importer;
+extern const importer_functions flac_importer;
 extern const importer_functions wave_importer;
 extern const importer_functions h264_importer;
 extern const importer_functions hevc_importer;
@@ -60,6 +61,7 @@ static const importer_functions *importer_func_table[] =
     &eac3_importer,
     &mp4a_als_importer,
     &dts_importer,
+    &flac_importer,
     &wave_importer,
     &h264_importer,
     &hevc_importer,
