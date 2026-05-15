@@ -29,8 +29,8 @@ namespace dllexportgen
     {
         static void Main(string[] args)
         {
-            var sw = new StreamReader(args[0] + "\\lsmash.h");
-            var so = new StreamWriter(args[0] + "\\lsmash.def");
+            var sw = new StreamReader(Path.Combine(args[0], "lsmash.h"));
+            var so = new StreamWriter(Path.Combine(args[0], "lsmash.def"));
             string prevline = "";
 
             so.WriteLine("EXPORTS");
