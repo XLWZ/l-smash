@@ -1,0 +1,3 @@
+[submodule "obuparse"]
+	path = obuparse
+	url = git@github.com:dwbuiten/obuparse.git

@@ -30,6 +30,12 @@
     <ClCompile Include="importer\amr_imp.c">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="codecs\av1.c">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="codecs\av1_obu.c">
+      <Filter>Sources</Filter>
+    </ClCompile>
     <ClCompile Include="common\bits.c">
       <Filter>Sources</Filter>
     </ClCompile>
@@ -79,6 +85,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="core\isom.c">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="importer\ivf_imp.c">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="common\list.c">
@@ -156,15 +165,30 @@
     <ClCompile Include="core\box_type.c">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="obuparse\obuparse.c">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="codecs\a52.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="codecs\av1.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="codecs\av1_obu.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="common\bits.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="core\box.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="core\box_default.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="core\box_type.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="common\bstream.h">
@@ -201,6 +225,9 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="lsmash.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="obuparse\obuparse.h">
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="common\memint.h">
