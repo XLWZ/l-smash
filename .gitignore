@@ -50,3 +50,5 @@ Release/
 CLIRelease/
 *.sdf
 *.opensdf
+build/
+.xmake/
