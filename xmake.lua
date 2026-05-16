@@ -141,13 +141,21 @@ target("lsmash")
               "importer/*.c",
               "obuparse/obuparse.c")
     add_includedirs(".", "obuparse")
-    set_languages("c99")
-    add_cflags("-Wshadow", "-Wall", "-pedantic", "-ffast-math")
-    -- Shared library settings that depend on resolved kind (use on_load)
+    -- Language standard: C99. xmake v3.0.8 erroneously adds -TP (C++ mode)
+    -- to MSVC when set_languages("c99") is used, so we handle it in on_load.
     on_load(function (target)
+        local toolchain = target:toolchain("gcc", "clang", "mingw")
+        if toolchain then
+            target:add("cflags", "-std=c99")
+            target:add("cflags", "-Wshadow", "-Wall", "-pedantic", "-ffast-math")
+        end
+        if target:toolchain("msvc") then
+            -- MSVC compiles .c as C by default, no flag needed.
+            -- But we need to override xmake's -TP if it's somehow added.
+            target:add("cflags", "/TC")
+        end
         if target:is_plat("linux") and target:kind() == "shared" then
             target:add("cflags", "-fPIC")
-            -- Match configure: SONAME = liblsmash.so.2, version-script = liblsmash.ver
             target:add("shflags", "-Wl,-soname,liblsmash.so.2")
             target:add("shflags", "-Wl,--version-script,liblsmash.ver")
         end
@@ -162,22 +170,25 @@ target("lsmash")
             end
         end
     end)
-    -- Windows-specific settings
-    if is_plat("windows") then
-        -- Build dllexportgen first, then run it to generate lsmash.def
-        if is_kind("shared") then
-            add_deps("dllexportgen")
-            add_rules("gen_def")
-            add_files("lsmash.def")
+    -- Platform and toolchain specific settings
+    on_load(function (target)
+        if target:is_plat("windows") then
+            -- Build dllexportgen first, then run it to generate lsmash.def
+            if target:kind() == "shared" then
+                target:add("deps", "dllexportgen")
+                target:add("rules", "gen_def")
+                target:add("files", "lsmash.def")
+            end
+            -- MinGW needs __USE_MINGW_ANSI_STDIO for correct printf format support
+            local toolchain = target:toolchain("mingw", "gcc", "clang")
+            if toolchain then
+                target:add("defines", "__USE_MINGW_ANSI_STDIO=1")
+            end
+            target:add("syslinks", "ws2_32", "shell32")  -- Winsock + CommandLineToArgvW
+        else
+            target:add("syslinks", "m")
         end
-        -- MinGW needs __USE_MINGW_ANSI_STDIO for correct printf format support
-        if is_toolchain("mingw", "gcc", "clang") then
-            add_defines("__USE_MINGW_ANSI_STDIO=1")
-        end
-        add_syslinks("ws2_32")  -- Winsock for osdep
-    else
-        add_syslinks("m")
-    end
+    end)
     add_headerfiles("lsmash.h")
     if not is_mode("debug") then
         set_optimize("smallest")
@@ -189,8 +200,19 @@ target("cli_common")
     set_default(false)
     add_files("cli/cli.c")
     add_includedirs(".")
-    set_languages("c99")
-    add_cflags("-Wshadow", "-Wall", "-pedantic", "-ffast-math")
+    on_load(function (target)
+        local toolchain = target:toolchain("gcc", "clang", "mingw")
+        if toolchain then
+            target:add("cflags", "-std=c99")
+            target:add("cflags", "-Wshadow", "-Wall", "-pedantic", "-ffast-math")
+        end
+        if target:toolchain("msvc") then
+            target:add("cflags", "/TC")
+        end
+        if target:is_plat("windows") then
+            target:add("syslinks", "shell32")  -- CommandLineToArgvW
+        end
+    end)
     if not is_mode("debug") then
         set_optimize("smallest")
     end
@@ -202,8 +224,16 @@ for _, tool in ipairs({"muxer", "remuxer", "boxdumper", "timelineeditor"}) do
         add_files("cli/" .. tool .. ".c")
         add_deps("lsmash", "cli_common")
         add_includedirs(".")
-        set_languages("c99")
-        add_cflags("-Wshadow", "-Wall", "-pedantic", "-ffast-math")
+        on_load(function (target)
+            local toolchain = target:toolchain("gcc", "clang", "mingw")
+            if toolchain then
+                target:add("cflags", "-std=c99")
+                target:add("cflags", "-Wshadow", "-Wall", "-pedantic", "-ffast-math")
+            end
+            if target:toolchain("msvc") then
+                target:add("cflags", "/TC")
+            end
+        end)
         if not is_mode("debug") then
             set_optimize("smallest")
         end
